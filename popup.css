@@ -1,0 +1,151 @@
+:root {
+  color-scheme: light;
+  --bg: linear-gradient(145deg, #f4efe4 0%, #f7fafc 55%, #e2eef7 100%);
+  --panel: rgba(255, 255, 255, 0.88);
+  --panel-border: rgba(32, 50, 70, 0.1);
+  --text: #17212b;
+  --muted: #5f6c78;
+  --primary: #145c9e;
+  --primary-hover: #104977;
+  --secondary: #eef4f8;
+  --secondary-hover: #dde8f0;
+  --success: #166534;
+  --error: #b42318;
+  --shadow: 0 18px 40px rgba(20, 37, 53, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 360px;
+  font-family: "Segoe UI", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.app {
+  padding: 18px;
+}
+
+.hero {
+  margin-bottom: 14px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.lead {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.panel {
+  padding: 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+
+.actions {
+  display: grid;
+  gap: 10px;
+}
+
+.button {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, background-color 120ms ease, opacity 120ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+  transform: none;
+}
+
+.button-primary {
+  color: #fff;
+  background: var(--primary);
+}
+
+.button-primary:hover {
+  background: var(--primary-hover);
+}
+
+.button-secondary {
+  color: var(--text);
+  background: var(--secondary);
+}
+
+.button-secondary:hover {
+  background: var(--secondary-hover);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 0;
+}
+
+.summary div {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.summary dt {
+  margin: 0 0 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.summary dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.status {
+  min-height: 20px;
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.status.success {
+  color: var(--success);
+}
+
+.status.error {
+  color: var(--error);
+}

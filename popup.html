@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Open Tab Backup</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <p class="eyebrow">Open Tab Backup</p>
+        <h1>タブを保存して復元</h1>
+        <p class="lead">現在のChromeウィンドウ構成をまとめてバックアップし、あとで別ウィンドウとして復元します。</p>
+      </header>
+
+      <section class="panel">
+        <div class="actions">
+          <button id="backupButton" class="button button-primary" type="button">今の状態をバックアップ</button>
+          <button id="restoreButton" class="button button-secondary" type="button">最新バックアップを復元</button>
+        </div>
+        <dl class="summary" id="summary">
+          <div>
+            <dt>保存日時</dt>
+            <dd id="savedAt">未保存</dd>
+          </div>
+          <div>
+            <dt>ウィンドウ数</dt>
+            <dd id="windowCount">-</dd>
+          </div>
+          <div>
+            <dt>タブ数</dt>
+            <dd id="tabCount">-</dd>
+          </div>
+        </dl>
+        <p id="statusMessage" class="status" aria-live="polite">準備完了</p>
+      </section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

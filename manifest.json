@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Open Tab Backup",
+  "version": "0.1.0",
+  "description": "Chromeで開いているウィンドウとタブをバックアップし、後で復元します。",
+  "permissions": [
+    "storage",
+    "tabs",
+    "windows"
+  ],
+  "action": {
+    "default_title": "Open Tab Backup",
+    "default_popup": "popup.html"
+  }
+}
