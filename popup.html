@@ -16,13 +16,22 @@
 
       <section class="panel">
         <div class="actions">
-          <button id="backupButton" class="button button-primary" type="button">今の状態をバックアップ</button>
-          <button id="restoreButton" class="button button-secondary" type="button">最新バックアップを復元</button>
+          <button id="backupButton" class="button button-primary" type="button">今の状態からコードを生成</button>
+          <button id="copyButton" class="button button-secondary" type="button">生成コードをコピー</button>
         </div>
-        <dl class="summary" id="summary">
+        <label class="field">
+          <span class="field-label">エクスポートコード</span>
+          <textarea
+            id="exportCode"
+            class="code-area"
+            readonly
+            placeholder="PC A でコードを生成すると、ここに復元用コードが表示されます。"
+          ></textarea>
+        </label>
+        <dl class="summary">
           <div>
-            <dt>保存日時</dt>
-            <dd id="savedAt">未保存</dd>
+            <dt>生成日時</dt>
+            <dd id="savedAt">未生成</dd>
           </div>
           <div>
             <dt>ウィンドウ数</dt>
@@ -33,6 +42,15 @@
             <dd id="tabCount">-</dd>
           </div>
         </dl>
+        <label class="field field-import">
+          <span class="field-label">インポートコード</span>
+          <textarea
+            id="importCode"
+            class="code-area"
+            placeholder="PC B でここへ貼り付けてください。"
+          ></textarea>
+        </label>
+        <button id="restoreButton" class="button button-secondary" type="button">貼り付けたコードから復元</button>
         <p id="statusMessage" class="status" aria-live="polite">準備完了</p>
       </section>
     </main>

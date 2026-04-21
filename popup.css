@@ -113,7 +113,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin: 16px 0 0;
+  margin: 16px 0;
 }
 
 .summary div {
@@ -140,6 +140,41 @@ body {
   font-size: 13px;
   line-height: 1.5;
   color: var(--muted);
+}
+
+.field {
+  display: block;
+  margin-top: 16px;
+}
+
+.field-import {
+  margin-top: 6px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.code-area {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  border: 1px solid rgba(32, 50, 70, 0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.code-area:focus {
+  outline: 2px solid rgba(20, 92, 158, 0.18);
+  border-color: rgba(20, 92, 158, 0.28);
 }
 
 .status.success {

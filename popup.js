@@ -1,9 +1,8 @@
-const STORAGE_META_KEY = "latestBackupMeta";
-const STORAGE_CHUNK_PREFIX = "latestBackupChunk_";
-const STORAGE_CHUNK_SIZE = 7000;
-
 const backupButton = document.getElementById("backupButton");
+const copyButton = document.getElementById("copyButton");
 const restoreButton = document.getElementById("restoreButton");
+const exportCodeElement = document.getElementById("exportCode");
+const importCodeElement = document.getElementById("importCode");
 const savedAtElement = document.getElementById("savedAt");
 const windowCountElement = document.getElementById("windowCount");
 const tabCountElement = document.getElementById("tabCount");
@@ -16,6 +15,7 @@ function setStatus(message, type = "") {
 
 function setBusy(isBusy) {
   backupButton.disabled = isBusy;
+  copyButton.disabled = isBusy;
   restoreButton.disabled = isBusy;
 }
 
@@ -35,81 +35,25 @@ function formatDateTime(isoString) {
   }).format(date);
 }
 
-function splitIntoChunks(text, chunkSize) {
-  const chunks = [];
+function bytesToBase64(bytes) {
+  let binary = "";
 
-  for (let index = 0; index < text.length; index += chunkSize) {
-    chunks.push(text.slice(index, index + chunkSize));
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
   }
 
-  return chunks;
+  return btoa(binary);
 }
 
-async function getLatestBackupMeta() {
-  const stored = await chrome.storage.sync.get(STORAGE_META_KEY);
-  return stored[STORAGE_META_KEY] || null;
-}
+function base64ToBytes(base64Text) {
+  const binary = atob(base64Text);
+  const bytes = new Uint8Array(binary.length);
 
-async function getLatestBackupPayload() {
-  const meta = await getLatestBackupMeta();
-  if (!meta) {
-    return null;
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
   }
 
-  const keys = Array.from({ length: meta.chunkCount }, (_, index) => {
-    return `${STORAGE_CHUNK_PREFIX}${String(index).padStart(3, "0")}`;
-  });
-  const storedChunks = await chrome.storage.sync.get(keys);
-  const serialized = keys.map((key) => storedChunks[key] || "").join("");
-
-  if (!serialized) {
-    throw new Error("バックアップデータが見つかりません。");
-  }
-
-  return {
-    meta,
-    payload: JSON.parse(serialized)
-  };
-}
-
-async function clearExistingBackupChunks(fromIndex, toIndex) {
-  if (typeof fromIndex !== "number" || typeof toIndex !== "number" || fromIndex > toIndex) {
-    return;
-  }
-
-  const keys = Array.from({ length: toIndex - fromIndex + 1 }, (_, offset) => {
-    const index = fromIndex + offset;
-    return `${STORAGE_CHUNK_PREFIX}${String(index).padStart(3, "0")}`;
-  });
-  await chrome.storage.sync.remove(keys);
-}
-
-async function saveLatestBackup(payload) {
-  const previousMeta = await getLatestBackupMeta();
-  const serialized = JSON.stringify(payload);
-  const chunks = splitIntoChunks(serialized, STORAGE_CHUNK_SIZE);
-  const data = {};
-
-  chunks.forEach((chunk, index) => {
-    data[`${STORAGE_CHUNK_PREFIX}${String(index).padStart(3, "0")}`] = chunk;
-  });
-
-  const meta = {
-    schemaVersion: 1,
-    savedAt: payload.savedAt,
-    windowCount: payload.windows.length,
-    tabCount: payload.windows.reduce((total, windowData) => total + windowData.tabs.length, 0),
-    chunkCount: chunks.length
-  };
-
-  data[STORAGE_META_KEY] = meta;
-  await chrome.storage.sync.set(data);
-
-  if (previousMeta && previousMeta.chunkCount > chunks.length) {
-    await clearExistingBackupChunks(chunks.length, previousMeta.chunkCount - 1);
-  }
-
-  return meta;
+  return bytes;
 }
 
 async function captureCurrentWindows() {
@@ -134,6 +78,29 @@ async function captureCurrentWindows() {
   };
 }
 
+function encodePayload(payload) {
+  const json = JSON.stringify(payload);
+  return bytesToBase64(new TextEncoder().encode(json));
+}
+
+function decodePayload(encodedText) {
+  try {
+    const normalized = encodedText.trim();
+    const decoded = new TextDecoder().decode(base64ToBytes(normalized));
+    return JSON.parse(decoded);
+  } catch (error) {
+    throw new Error("インポートコードを読み取れません。コピー内容を確認してください。");
+  }
+}
+
+function summarizePayload(payload) {
+  return {
+    savedAt: payload.savedAt,
+    windowCount: payload.windows.length,
+    tabCount: payload.windows.reduce((total, windowData) => total + windowData.tabs.length, 0)
+  };
+}
+
 async function restoreBackup(payload) {
   if (!payload.windows.length) {
     throw new Error("復元できるウィンドウがありません。");
@@ -151,43 +118,60 @@ async function restoreBackup(payload) {
   }
 }
 
-async function refreshSummary() {
-  try {
-    const meta = await getLatestBackupMeta();
-
-    if (!meta) {
-      savedAtElement.textContent = "未保存";
-      windowCountElement.textContent = "-";
-      tabCountElement.textContent = "-";
-      return;
-    }
-
-    savedAtElement.textContent = formatDateTime(meta.savedAt);
-    windowCountElement.textContent = String(meta.windowCount);
-    tabCountElement.textContent = String(meta.tabCount);
-  } catch (error) {
-    setStatus(error.message || "保存情報の読み込みに失敗しました。", "error");
+function renderSummary(summary) {
+  if (!summary) {
+    savedAtElement.textContent = "未生成";
+    windowCountElement.textContent = "-";
+    tabCountElement.textContent = "-";
+    return;
   }
+
+  savedAtElement.textContent = formatDateTime(summary.savedAt);
+  windowCountElement.textContent = String(summary.windowCount);
+  tabCountElement.textContent = String(summary.tabCount);
+}
+
+async function copyExportCode() {
+  const code = exportCodeElement.value.trim();
+  if (!code) {
+    throw new Error("先にエクスポートコードを生成してください。");
+  }
+
+  await navigator.clipboard.writeText(code);
 }
 
 async function handleBackupClick() {
   setBusy(true);
-  setStatus("バックアップ中です...");
+  setStatus("エクスポートコードを生成しています...");
 
   try {
     const payload = await captureCurrentWindows();
     if (!payload.windows.length) {
-      throw new Error("保存対象の通常ウィンドウが見つかりません。");
+      throw new Error("出力対象の通常ウィンドウが見つかりません。");
     }
 
-    const meta = await saveLatestBackup(payload);
-    await refreshSummary();
+    const summary = summarizePayload(payload);
+    exportCodeElement.value = encodePayload(payload);
+    renderSummary(summary);
     setStatus(
-      `${meta.windowCount}個のウィンドウ、${meta.tabCount}個のタブを保存しました。`,
+      `${summary.windowCount}個のウィンドウ、${summary.tabCount}個のタブからコードを生成しました。`,
       "success"
     );
   } catch (error) {
-    setStatus(error.message || "バックアップに失敗しました。", "error");
+    setStatus(error.message || "コード生成に失敗しました。", "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function handleCopyClick() {
+  setBusy(true);
+
+  try {
+    await copyExportCode();
+    setStatus("エクスポートコードをクリップボードへコピーしました。", "success");
+  } catch (error) {
+    setStatus(error.message || "コピーに失敗しました。", "error");
   } finally {
     setBusy(false);
   }
@@ -198,14 +182,20 @@ async function handleRestoreClick() {
   setStatus("復元中です...");
 
   try {
-    const backup = await getLatestBackupPayload();
-    if (!backup) {
-      throw new Error("復元できるバックアップがありません。");
+    const code = importCodeElement.value.trim();
+    if (!code) {
+      throw new Error("インポートコードを貼り付けてください。");
     }
 
-    await restoreBackup(backup.payload);
+    const payload = decodePayload(code);
+    if (!payload || !Array.isArray(payload.windows)) {
+      throw new Error("インポートコードの形式が正しくありません。");
+    }
+
+    await restoreBackup(payload);
+    const summary = summarizePayload(payload);
     setStatus(
-      `${backup.meta.windowCount}個のウィンドウ、${backup.meta.tabCount}個のタブを復元しました。`,
+      `${summary.windowCount}個のウィンドウ、${summary.tabCount}個のタブを復元しました。`,
       "success"
     );
   } catch (error) {
@@ -216,6 +206,6 @@ async function handleRestoreClick() {
 }
 
 backupButton.addEventListener("click", handleBackupClick);
+copyButton.addEventListener("click", handleCopyClick);
 restoreButton.addEventListener("click", handleRestoreClick);
-
-refreshSummary();
+renderSummary(null);

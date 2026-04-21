@@ -4,7 +4,6 @@
   "version": "0.1.0",
   "description": "Chromeで開いているウィンドウとタブをバックアップし、後で復元します。",
   "permissions": [
-    "storage",
     "tabs",
     "windows"
   ],
