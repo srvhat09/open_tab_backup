@@ -1,60 +1,54 @@
 <!doctype html>
 <html lang="ja">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Open Tab Backup</title>
-    <link rel="stylesheet" href="popup.css">
-  </head>
-  <body>
-    <main class="app">
-      <header class="hero">
-        <p class="eyebrow">Open Tab Backup</p>
-        <h1>タブを保存して復元</h1>
-        <p class="lead">現在のChromeウィンドウ構成をまとめてバックアップし、あとで別ウィンドウとして復元します。</p>
-      </header>
 
-      <section class="panel">
-        <div class="actions">
-          <button id="backupButton" class="button button-primary" type="button">今の状態からコードを生成</button>
-          <button id="copyButton" class="button button-secondary" type="button">生成コードをコピー</button>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Open Tab Backup</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <main class="app">
+    <header class="hero">
+      <p class="eyebrow">Open Tab Backup</p>
+      <h1>タブを保存して復元</h1>
+      <p class="lead">現在のChromeウィンドウ構成をまとめてバックアップし、あとで別ウィンドウとして復元します。</p>
+    </header>
+
+    <section class="panel">
+      <div class="actions">
+        <button id="backupButton" class="button button-primary" type="button">今の状態からコードを生成</button>
+        <button id="copyButton" class="button button-secondary" type="button">生成コードをコピー</button>
+      </div>
+      <label class="field">
+        <span class="field-label">エクスポートコード</span>
+        <textarea id="exportCode" class="code-area" readonly placeholder="移行元でコードを生成すると、ここに復元用コードが表示されます。"></textarea>
+      </label>
+      <dl class="summary">
+        <div>
+          <dt>生成日時</dt>
+          <dd id="savedAt">未生成</dd>
         </div>
-        <label class="field">
-          <span class="field-label">エクスポートコード</span>
-          <textarea
-            id="exportCode"
-            class="code-area"
-            readonly
-            placeholder="PC A でコードを生成すると、ここに復元用コードが表示されます。"
-          ></textarea>
-        </label>
-        <dl class="summary">
-          <div>
-            <dt>生成日時</dt>
-            <dd id="savedAt">未生成</dd>
-          </div>
-          <div>
-            <dt>ウィンドウ数</dt>
-            <dd id="windowCount">-</dd>
-          </div>
-          <div>
-            <dt>タブ数</dt>
-            <dd id="tabCount">-</dd>
-          </div>
-        </dl>
-        <label class="field field-import">
-          <span class="field-label">インポートコード</span>
-          <textarea
-            id="importCode"
-            class="code-area"
-            placeholder="PC B でここへ貼り付けてください。"
-          ></textarea>
-        </label>
-        <button id="restoreButton" class="button button-secondary" type="button">貼り付けたコードから復元</button>
-        <p id="statusMessage" class="status" aria-live="polite">準備完了</p>
-      </section>
-    </main>
+        <div>
+          <dt>ウィンドウ数</dt>
+          <dd id="windowCount">-</dd>
+        </div>
+        <div>
+          <dt>タブ数</dt>
+          <dd id="tabCount">-</dd>
+        </div>
+      </dl>
+      <label class="field field-import">
+        <span class="field-label">インポートコード</span>
+        <textarea id="importCode" class="code-area" placeholder="移行先で復元用コードを貼り付けてください。"></textarea>
+      </label>
+      <button id="restoreButton" class="button button-secondary" type="button">復元用コードから復元</button>
+      <p id="statusMessage" class="status" aria-live="polite">準備完了</p>
+    </section>
+  </main>
 
-    <script src="popup.js"></script>
-  </body>
+  <script src="popup.js"></script>
+</body>
+
 </html>
